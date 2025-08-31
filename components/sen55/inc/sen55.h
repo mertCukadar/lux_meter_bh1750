@@ -19,6 +19,20 @@
 #define SEN55_READ_DEVICE_STATUS 0xD206 // Command to read device status wait 1ms
 
 
+typedef struct sen55_sensor_res_t {
+    uint16_t pm1_0;      // PM1.0 concentration in µg/m³
+    uint16_t pm2_5;      // PM2.5 concentration in µg/m³
+    uint16_t pm4_0;      // PM4.0 concentration in µg/m³
+    uint16_t pm10_0;     // PM10 concentration in µg/m³
+    uint16_t RH;         // Relative Humidity in %RH
+    uint16_t T;          // Temperature in °C
+    uint16_t VOC;        // Volatile Organic Compounds in ppb
+    uint16_t NOx;        // Nitrogen Oxides in ppb
+ } sen55_sensor_res_t;
+
+
+
+
 /*
 @brief Initialize the SEN55 sensor.
 @param sen55_dev Pointer to the I2C device handle for the SEN55 sensor.
@@ -40,7 +54,7 @@ esp_err_t sen55_start_fan_cleaning(void);
 
 esp_err_t sen55_read_device_status(void);
 
-
+esp_err_t sen55_soft_reset(void);
 
 
 #endif // SEN55_H

@@ -11,23 +11,25 @@
 
 void app_main(void)
 {
-float light_level = 0.0;
 
-i2c_init();
+    i2c_init();
 
-// bh1750_init();
+    sen55_init();
 
-//     while (1) {
-//         if (bh1750_read_light_level(&light_level) == ESP_OK) {
-//             ESP_LOGI("MAIN", "Light Level: %f lx", light_level);
-//         } else {
-//             ESP_LOGE("MAIN", "Failed to read light level");
-//         }
-//         vTaskDelay(pdMS_TO_TICKS(2000)); // Delay for 2 seconds
-//     }
+    sen55_soft_reset();
+
+    sen55_start_measurement();
+    ESP_LOGI("MAIN", "Measurement started successfully.");
 
 
-sen55_init();
-sen55_read_device_status();
+    while(1){
+        vTaskDelay(pdMS_TO_TICKS(5000)); // Read every 5 seconds
+        esp_err_t ret = sen55_read_measurement();
+        if (ret != ESP_OK) {
+            ESP_LOGE("MAIN", "Failed to read measurement data: %s", esp_err_to_name(ret));
+        }
+}
+    
+
 
 }

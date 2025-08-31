@@ -19,8 +19,8 @@ esp_err_t i2c_init()
     i2c_master_bus_config_t i2c_config = {
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .i2c_port = I2C_PORT,
-        .sda_io_num = I2C_MASTER_SDA,
-        .scl_io_num = I2C_MASTER_SCL,
+        .sda_io_num = 8,   // SDA = GPIO8
+        .scl_io_num = 9,   // SCL = GPIO9
         .glitch_ignore_cnt = 7,
         .flags.enable_internal_pullup = true,
     };
