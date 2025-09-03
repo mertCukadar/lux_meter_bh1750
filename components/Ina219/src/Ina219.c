@@ -55,37 +55,36 @@ esp_err_t ina219_init(void)
     ret = write_u16(ina_dev, INA219_REG_CONFIG, INA219_CONFIG_VALUE);
     if (ret != ESP_OK) return ret;
 
-    ESP_LOGI(TAG, "INA219 init OK. CAL= %u, CURRENT_LSB= %.6f A/bit",
-             CALIB_VALUE, CURRENT_LSB_A);
     return ESP_OK;
 }
 
 
-esp_err_t ina219_read_current(float *current)
+void vTask_ina219_read_current(void *pvParameters)
 {
+    float *current = (float *)pvParameters;
     uint16_t raw_current;
-    esp_err_t ret = read_u16(ina_dev, INA219_REG_CURRENT, &raw_current);
-    if (ret != ESP_OK) return ret;
-
-
-
-
-    int16_t signed_current = (int16_t)raw_current; 
-
-    ESP_LOGI(TAG, "Raw current: 0x%04X, Signed: %d",
-         raw_current, signed_current);
+    esp_err_t ret;
+    int16_t signed_current;
     
-    // Hesapla
-    // 1 bit = 100 µA, CALIB_VALUE = 0.04096 / (CURRENT_LSB_A * SHUNT_RES_OHMS)
-    // 100 µA = 0.0001 A
+    while(1){
+        vTaskDelay(pdMS_TO_TICKS(1000)); // 1 saniye bekle
 
-    *current = (float)signed_current /(1000*100);
-    ESP_LOGI(TAG, "Current: %.6f A", *current);
+        ret = read_u16(ina_dev, INA219_REG_CURRENT, &raw_current);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to read current: %s", esp_err_to_name(ret));
+            continue;
+        }
 
-    return ESP_OK;
+        signed_current = (int16_t)raw_current; 
+        
+        // Hesapla
+        // 1 bit = 100 µA, CALIB_VALUE = 0.04096 / (CURRENT_LSB_A * SHUNT_RES_OHMS)
+        // 100 µA = 0.0001 A
+
+        *current = (float)signed_current /(1000*100);
+        ESP_LOGI(TAG, "Current: %.6f A", *current);
+    }
+ 
+
 }
 
-//3.27A
-
-
-//0.51

@@ -76,54 +76,49 @@ esp_err_t sen55_start_measurement(void){
 }
 
 
-esp_err_t sen55_read_measurement(void){
+void vTask_sen55_read_measurement(void *pvParameters){
     uint8_t measurement_data[24]; 
     uint8_t cmd[2] = { (SEN55_READ_MEASUREMENT >> 8) & 0xFF, SEN55_READ_MEASUREMENT & 0xFF };
-    esp_err_t ret = i2c_master_transmit(sen55_handle , cmd , sizeof(cmd) , -1);
+    esp_err_t ret;
+    
 
-    vTaskDelay(pdMS_TO_TICKS(20)); // Wait for 20ms
 
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to send read measurement command: %s", esp_err_to_name(ret));
-        return ret;
+    while(1){
+        vTaskDelay(pdMS_TO_TICKS(5000)); // Read every 5 seconds
+        ret= i2c_master_transmit(sen55_handle , cmd , sizeof(cmd) , -1);
+
+        vTaskDelay(pdMS_TO_TICKS(20)); // Wait for 20ms
+
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to send read measurement command: %s", esp_err_to_name(ret));
+        }
+
+        ret = i2c_master_receive(sen55_handle , measurement_data , sizeof(measurement_data) , -1);
+
+
+
+        sen55_data_inc_pm.pm1_0 = (measurement_data[0] << 8 | measurement_data[1]) / 10;
+        sen55_data_inc_pm.pm2_5 = (measurement_data[3] << 8 | measurement_data[4])/10;
+        sen55_data_inc_pm.pm4_0 = (measurement_data[6] << 8 | measurement_data[7])/10;
+        sen55_data_inc_pm.pm10_0 = (measurement_data[9] << 8 | measurement_data[10])/10;
+        sen55_data_inc_pm.RH = (measurement_data[12] << 8 | measurement_data[13])/100;
+        sen55_data_inc_pm.T = (measurement_data[15] << 8 | measurement_data[16])/200;
+        sen55_data_inc_pm.VOC = (measurement_data[18] << 8 | measurement_data[19])/10;
+        sen55_data_inc_pm.NOx = (measurement_data[21] << 8 | measurement_data[22])/10;
+
+
+        ESP_LOGI(TAG, "PM1.0: %d µg/m³", sen55_data_inc_pm.pm1_0);
+        ESP_LOGI(TAG, "PM2.5: %d µg/m³", sen55_data_inc_pm.pm2_5);
+        ESP_LOGI(TAG, "PM4.0: %d µg/m³", sen55_data_inc_pm.pm4_0);
+        ESP_LOGI(TAG, "PM10: %d µg/m³", sen55_data_inc_pm.pm10_0);
+        ESP_LOGI(TAG, "Relative Humidity: %d %%RH", sen55_data_inc_pm.RH);
+        ESP_LOGI(TAG, "Temperature: %d °C", sen55_data_inc_pm.T);
+        ESP_LOGI(TAG, "VOC: %d ppb", sen55_data_inc_pm.VOC);
+        ESP_LOGI(TAG, "NOx: %d ppb", sen55_data_inc_pm.NOx);
+
+
     }
 
-    ret = i2c_master_receive(sen55_handle , measurement_data , sizeof(measurement_data) , -1);
-
-
-
-
-    //print the measurement data
-    ESP_LOGI(TAG, "Measurement Data: ");
-    for (int i = 0; i < sizeof(measurement_data); i++)
-    {
-        ESP_LOGI(TAG, "Byte %d: 0x%02X", i, measurement_data[i]);
-    }
-    ESP_LOGI(TAG, "Measurement data read successfully.");
-
-    sen55_data_inc_pm.pm1_0 = (measurement_data[0] << 8 | measurement_data[1]) / 10;
-    sen55_data_inc_pm.pm2_5 = (measurement_data[3] << 8 | measurement_data[4])/10;
-    sen55_data_inc_pm.pm4_0 = (measurement_data[6] << 8 | measurement_data[7])/10;
-    sen55_data_inc_pm.pm10_0 = (measurement_data[9] << 8 | measurement_data[10])/10;
-    sen55_data_inc_pm.RH = (measurement_data[12] << 8 | measurement_data[13])/100;
-    sen55_data_inc_pm.T = (measurement_data[15] << 8 | measurement_data[16])/200;
-    sen55_data_inc_pm.VOC = (measurement_data[18] << 8 | measurement_data[19])/10;
-    sen55_data_inc_pm.NOx = (measurement_data[21] << 8 | measurement_data[22])/10;
-
-
-    ESP_LOGI(TAG, "PM1.0: %d µg/m³", sen55_data_inc_pm.pm1_0);
-    ESP_LOGI(TAG, "PM2.5: %d µg/m³", sen55_data_inc_pm.pm2_5);
-    ESP_LOGI(TAG, "PM4.0: %d µg/m³", sen55_data_inc_pm.pm4_0);
-    ESP_LOGI(TAG, "PM10: %d µg/m³", sen55_data_inc_pm.pm10_0);
-    ESP_LOGI(TAG, "Relative Humidity: %d %%RH", sen55_data_inc_pm.RH);
-    ESP_LOGI(TAG, "Temperature: %d °C", sen55_data_inc_pm.T);
-    ESP_LOGI(TAG, "VOC: %d ppb", sen55_data_inc_pm.VOC);
-    ESP_LOGI(TAG, "NOx: %d ppb", sen55_data_inc_pm.NOx);
-
-
-
-
-    return ESP_OK;
 }
 
 

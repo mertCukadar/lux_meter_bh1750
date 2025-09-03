@@ -46,7 +46,7 @@ esp_err_t sen55_start_measurement(void);
 
 esp_err_t sen55_stop_measurement(void);
 
-esp_err_t sen55_read_measurement(void);
+void vTask_sen55_read_measurement(void *pvParameters);
 
 esp_err_t sen55_check_data_ready(void);
 

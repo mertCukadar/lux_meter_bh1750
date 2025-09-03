@@ -39,38 +39,38 @@ ESP_LOGI(TAG , "Initializing BH1750 sensor...");
 }
 
 
-esp_err_t bh1750_read_light_level(float *lux) {
+void vTask_bh1750_read_light_level(void *pvParameters){
+
+    float *lux = (float *)pvParameters;
+
     if (lux == NULL) {
         ESP_LOGE(TAG, "Invalid argument: light_level pointer is NULL");
-        return ESP_ERR_INVALID_ARG;
     }
-
     uint8_t cmd = BH1750_CMD_H_RES_MODE;
-    esp_err_t ret = i2c_master_transmit(bh1750_handle, &cmd, 1, -1);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to send measurement command to BH1750: %s", esp_err_to_name(ret));
-        return ret;
-    }
-
+    esp_err_t ret;
     uint8_t data[2];
-    ret = i2c_master_receive(bh1750_handle, data, 2, -1);
+    uint16_t raw_value;
 
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to read data from BH1750: %s", esp_err_to_name(ret));
-        return ret;
+
+    while(1){
+        vTaskDelay(pdMS_TO_TICKS(180)); // Wait for measurement to complete (max 180ms for high-res mode)
+
+
+        ret = i2c_master_transmit(bh1750_handle, &cmd, 1, -1);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to send measurement command to BH1750: %s", esp_err_to_name(ret));
+        }
+
+        ret = i2c_master_receive(bh1750_handle, data, 2, -1);
+
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to read data from BH1750: %s", esp_err_to_name(ret));
+        }
+
+
+        raw_value = (data[0] << 8) | data[1];
+    
+        *lux = ((float)(raw_value)) / 1.2; // Convert to lux
     }
 
-    // print data to terminal for debugging
-    ESP_LOGI(TAG, "Raw data from BH1750: 0x%02X 0x%02X", data[0], data[1]);
-
-
-    uint16_t raw_value = (data[0] << 8) | data[1];
-    
-    *lux = ((float)(raw_value)) / 1.2; // Convert to lux
-
-
-
-
-
-    return ESP_OK;
 }

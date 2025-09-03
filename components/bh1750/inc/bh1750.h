@@ -18,7 +18,7 @@
 
 esp_err_t bh1750_init();
 
-esp_err_t bh1750_read_light_level(float *lux);
+void vTask_bh1750_read_light_level(void *pvParameters);
 
 
 

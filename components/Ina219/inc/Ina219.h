@@ -54,7 +54,8 @@ static uint16_t CALIB_VALUE;
 esp_err_t write_u16(i2c_master_dev_handle_t dev, uint8_t reg, uint16_t val_be);
 esp_err_t read_u16(i2c_master_dev_handle_t dev, uint8_t reg, uint16_t *out);
 esp_err_t ina219_init(void);
-esp_err_t ina219_read_current(float *current);
+
+void vTask_ina219_read_current(void *pvParameters);
 
 
 
