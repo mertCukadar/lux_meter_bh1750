@@ -7,6 +7,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "i2c_handler.h"
+#include "data_handler.h"
 
 
 #define BH1750_I2C_ADDRESS 0x23  // Default I2C address for BH1750

@@ -1,6 +1,6 @@
 set(SRC_DIRS src)
 set(INCLUDE_DIRS inc)
-set(REQUIRES i2c_handler driver esp_driver_i2c)
+set(REQUIRES i2c_handler driver esp_driver_i2c data_handler)
 
 idf_component_register(SRC_DIRS ${SRC_DIRS}
                     INCLUDE_DIRS ${INCLUDE_DIRS}

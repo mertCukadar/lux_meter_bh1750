@@ -1,0 +1,15 @@
+menu "Wifi Configuration"
+
+config WIFI_SSID
+    string "WiFi SSID"
+    default "MyWiFiNetwork"
+    help
+      Set the SSID of the WiFi network to connect to.
+
+config WIFI_PASSWORD
+    string "WiFi Password"
+    default "password123"
+    help
+      Set the password for the WiFi network.
+
+endmenu

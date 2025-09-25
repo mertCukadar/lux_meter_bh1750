@@ -41,19 +41,18 @@ ESP_LOGI(TAG , "Initializing BH1750 sensor...");
 
 void vTask_bh1750_read_light_level(void *pvParameters){
 
-    float *lux = (float *)pvParameters;
 
-    if (lux == NULL) {
-        ESP_LOGE(TAG, "Invalid argument: light_level pointer is NULL");
-    }
+
     uint8_t cmd = BH1750_CMD_H_RES_MODE;
     esp_err_t ret;
     uint8_t data[2];
     uint16_t raw_value;
+    measurements_t *meas = data_handler_get();
 
 
     while(1){
-        vTaskDelay(pdMS_TO_TICKS(180)); // Wait for measurement to complete (max 180ms for high-res mode)
+
+        vTaskDelay(pdMS_TO_TICKS(5000)); // Wait for measurement to complete (max 180ms for high-res mode)
 
 
         ret = i2c_master_transmit(bh1750_handle, &cmd, 1, -1);
@@ -70,7 +69,9 @@ void vTask_bh1750_read_light_level(void *pvParameters){
 
         raw_value = (data[0] << 8) | data[1];
     
-        *lux = ((float)(raw_value)) / 1.2; // Convert to lux
+        float lux = ((float)(raw_value)) / 1.2; // Convert to lux
+        meas->lux = lux;
+        ESP_LOGI(TAG, "Light Level: %.2f lux", lux);
     }
 
 }

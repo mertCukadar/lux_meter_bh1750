@@ -11,6 +11,7 @@
 #include "driver/i2c_master.h"
 #include "freertos/FreeRTOS.h"
 #include "i2c_handler.h"
+#include "data_handler.h"
 
 /* Register addresses */
 static const uint8_t INA219_ADDR        = 0x40;
@@ -62,4 +63,4 @@ void vTask_ina219_read_current(void *pvParameters);
 
 
 
-#endif /* INA219_H_ */
+#endif /* INA219_H_ */                                                                                                                                                                                                  

@@ -1,0 +1,78 @@
+menu "ESP-NOW Configuration"
+
+config ESP_NOW_CHANNEL
+    int "ESP-NOW Channel"
+    default 1
+    range 1 14
+    help
+      Set the WiFi channel for ESP-NOW communication.
+
+config ESP_NOW_PEER_MAC
+    string "ESP-NOW Peer MAC Address"
+    default "24:0A:C4:12:34:56"
+    help
+      Set the MAC address of the ESP-NOW peer device.
+
+config ESP_NOW_SEND_INTERVAL
+    int "ESP-NOW Send Interval (ms)"
+    default 1000
+    help
+      Set the interval in milliseconds for sending ESP-NOW messages.
+
+config ESP_NOW_MAX_RETRIES
+    int "ESP-NOW Maximum Retries"
+    default 5
+    help
+      Set the maximum number of retries for sending ESP-NOW messages.
+
+config ESP_NOW_PMK
+    string "ESP-NOW Primary Master Key"
+    default "0123456789abcdef"
+    help
+      Set the Primary Master Key for ESP-NOW communication.
+
+config ESP_NOW_LMK
+    string "ESP-NOW Local Master Key"
+    default "abcdef0123456789"
+    help
+      Set the Local Master Key for ESP-NOW communication.
+
+config ESP_NOW_SEND_LEN
+    int "ESP-NOW Send Length"
+    default 250
+    range 1 250
+    help
+      Set the length of the ESP-NOW message to be sent.
+
+    config ESPNOW_ENABLE_POWER_SAVE
+        bool "Enable ESPNOW Power Save"
+        default "n"
+        select ESP_WIFI_STA_DISCONNECTED_PM_ENABLE
+        depends on ESPNOW_WIFI_MODE_STATION
+        help
+            With ESPNOW power save enabled, chip would be able to wakeup and sleep periodically
+            Notice ESP_WIFI_STA_DISCONNECTED_PM_ENABLE is essential at Wi-Fi disconnected
+
+    config ESPNOW_WAKE_WINDOW
+        int "ESPNOW wake window, unit in millisecond"
+        range 0 65535
+        default 50
+        depends on ESPNOW_ENABLE_POWER_SAVE
+        help
+            ESPNOW wake window
+
+    config ESPNOW_WAKE_INTERVAL
+        int "ESPNOW wake interval, unit in millisecond"
+        range 1 65535
+        default 100
+        depends on ESPNOW_ENABLE_POWER_SAVE
+        help
+            ESPNOW wake interval
+
+    config ESPNOW_ENABLE_LONG_RANGE
+        bool "Enable Long Range"
+        default "n"
+        help
+            When enable long range, the PHY rate of ESP32 will be 512Kbps or 256Kbps
+
+endmenu

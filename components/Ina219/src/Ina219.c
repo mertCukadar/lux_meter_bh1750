@@ -61,13 +61,14 @@ esp_err_t ina219_init(void)
 
 void vTask_ina219_read_current(void *pvParameters)
 {
-    float *current = (float *)pvParameters;
+    
     uint16_t raw_current;
     esp_err_t ret;
     int16_t signed_current;
     
     while(1){
-        vTaskDelay(pdMS_TO_TICKS(1000)); // 1 saniye bekle
+        measurements_t *meas = data_handler_get();
+        vTaskDelay(pdMS_TO_TICKS(5000)); // 1 saniye bekle
 
         ret = read_u16(ina_dev, INA219_REG_CURRENT, &raw_current);
         if (ret != ESP_OK) {
@@ -81,8 +82,9 @@ void vTask_ina219_read_current(void *pvParameters)
         // 1 bit = 100 µA, CALIB_VALUE = 0.04096 / (CURRENT_LSB_A * SHUNT_RES_OHMS)
         // 100 µA = 0.0001 A
 
-        *current = (float)signed_current /(1000*100);
-        ESP_LOGI(TAG, "Current: %.6f A", *current);
+        float current = (float)signed_current /(1000*100);
+        meas->current = current;
+        ESP_LOGI(TAG, "Current: %.6f A", current);
     }
  
 

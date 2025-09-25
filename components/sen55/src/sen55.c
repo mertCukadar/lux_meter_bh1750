@@ -59,7 +59,6 @@ esp_err_t sen55_read_device_status(void){
 
 esp_err_t sen55_start_measurement(void){
 
-
     uint8_t cmd[2] = { (SEN55_CMD_START_MEASUREMENT >> 8) & 0xFF, SEN55_CMD_START_MEASUREMENT & 0xFF };
     esp_err_t ret = i2c_master_transmit(sen55_handle , cmd , sizeof(cmd) , -1);
 
@@ -77,6 +76,8 @@ esp_err_t sen55_start_measurement(void){
 
 
 void vTask_sen55_read_measurement(void *pvParameters){
+    measurements_t *meas = data_handler_get();
+
     uint8_t measurement_data[24]; 
     uint8_t cmd[2] = { (SEN55_READ_MEASUREMENT >> 8) & 0xFF, SEN55_READ_MEASUREMENT & 0xFF };
     esp_err_t ret;
@@ -106,7 +107,13 @@ void vTask_sen55_read_measurement(void *pvParameters){
         sen55_data_inc_pm.VOC = (measurement_data[18] << 8 | measurement_data[19])/10;
         sen55_data_inc_pm.NOx = (measurement_data[21] << 8 | measurement_data[22])/10;
 
+        meas->pm2_5 = sen55_data_inc_pm.pm2_5;
+        meas->pm10 = sen55_data_inc_pm.pm10_0;
+        meas->voc = sen55_data_inc_pm.VOC;
+        meas->temperature = sen55_data_inc_pm.T;
+        meas->humidity = sen55_data_inc_pm.RH;
 
+        
         ESP_LOGI(TAG, "PM1.0: %d µg/m³", sen55_data_inc_pm.pm1_0);
         ESP_LOGI(TAG, "PM2.5: %d µg/m³", sen55_data_inc_pm.pm2_5);
         ESP_LOGI(TAG, "PM4.0: %d µg/m³", sen55_data_inc_pm.pm4_0);
