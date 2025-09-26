@@ -74,6 +74,20 @@ esp_err_t sen55_start_measurement(void){
     return ESP_OK;
 }
 
+esp_err_t sen55_stop_measurement(void){
+    uint8_t cmd[2] = { (SEN55_CMD_STOP_MEASUREMENT >> 8) & 0xFF, SEN55_CMD_STOP_MEASUREMENT & 0xFF };
+    esp_err_t ret = i2c_master_transmit(sen55_handle , cmd , sizeof(cmd) , -1);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to stop measurement: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    vTaskDelay(pdMS_TO_TICKS(200)); // Wait for 200ms after stopping measurement
+    ESP_LOGI(TAG, "Measurement stopped successfully.");
+    return ESP_OK;
+}
+
+
+
 
 void vTask_sen55_read_measurement(void *pvParameters){
     measurements_t *meas = data_handler_get();

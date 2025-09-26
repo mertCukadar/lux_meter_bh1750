@@ -16,9 +16,9 @@
 static const char *TAG = "MAIN";
 static const uint8_t PEER_MAC[6] = {0xCC,0xBA,0x97,0x12,0x51,0x40};
 
-// 5 dk’da bir gonderip uyutan supervisor
+// 5 min deep sleep
 static void vTask_supervisor(void *pv) {
-    // ESPNOW init + peer ekle (bir kere)
+    
     esp_err_t e = esp_now_tx_init_once();
     if (e != ESP_OK) {
         ESP_LOGE("SUP", "esp_now_tx_init_once: %s", esp_err_to_name(e));
@@ -27,28 +27,27 @@ static void vTask_supervisor(void *pv) {
     e = espnow_tx_add_peer(PEER_MAC);
     if (e != ESP_OK && e != ESP_ERR_ESPNOW_EXIST) ESP_ERROR_CHECK(e);
 
-    // ilk boot’ta sensörlerin değer üretmesi için kısa bir ısınma
-    vTaskDelay(pdMS_TO_TICKS(6000));
+    vTaskDelay(pdMS_TO_TICKS(120000)); // 2 dakika bekle
+    ESP_LOGI(TAG, "2 min elapsed, sending data and going to sleep...");
 
     for (;;) {
-        // 1) snapshot al (yırtılmayı önlemek için kopya alıyoruz)
         measurements_t snap = *data_handler_get();   // senin getter’in pointer döndürüyor
 
-        // 2) gonder
+       
         ESP_ERROR_CHECK(esp_now_send_measurements(PEER_MAC)); 
-        // Not: Yukarıdaki fonksiyon global state’i gönderiyor.
-        // İstersen bunun bir "snapshot" alan versiyonunu da yazabilirsin:
-        // esp_now_send_measurements_snapshot(PEER_MAC, &snap);
+      
 
-        // 3) ESPNOW airtime/callback icin minicik bekleme
         vTaskDelay(pdMS_TO_TICKS(50));
 
-        // 4) 5 dakika deep sleep
+        // sensörleri kapat
+        sen55_stop_measurement();
+       
+
+        // 4) 5 min deep sleep
         const uint64_t uS_5MIN = 1ULL * 60ULL * 1000000ULL;
         ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(uS_5MIN));
         ESP_LOGI(TAG, "sleeping for 5 min...");
         esp_deep_sleep_start();
-        // buradan sonrası calismaz; uyaninca tum sistem yeniden baslar
     }
 }
 
